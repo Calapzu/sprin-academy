@@ -2,6 +2,7 @@ package com.example.cashcard;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import net.minidev.json.JSONArray;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,7 +126,7 @@ class CashCardApplicationTests {
 	//assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 	//Por último, utilizaremos la información de la cabecera Location para obtener la tarjeta CashCard recién creada.
 	@Test
-	//@DirtiesContext
+	@DirtiesContext
 	void shouldCreateANewCashCard() {
 		CashCard newCashCard = new CashCard(null, 250.00);
 		ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
@@ -144,9 +145,39 @@ class CashCardApplicationTests {
 		assertThat(amount).isEqualTo(250.00);
 	}
 
+	//Comprender la prueba.
+	//
+	//documentContext.read("$.length()");
+	//...
+	//documentContext.read("$..id");
+	//...
+	//documentContext.read("$..amount");
+	//¡Echa un vistazo a estas nuevas expresiones JsonPath!
+	//
+	//documentContext.read("$.length()") calcula la longitud de la matriz.
+	//
+	//.read("$..id") recupera la lista de todos los valores de id devueltos, mientras que .read("$..amount")
+	// recoge todos los importes devueltos.
+	//
+	//Para aprender más sobre JsonPath, un buen lugar para empezar es aquí en la documentación de JsonPath.
+	//
+	//assertThat(...).containsExactlyInAnyOrder(...)
+	//No hemos garantizado el orden de la lista de CashCard -- salen en el orden que la base de datos decida devolverlas.
+	// Como no especificamos el orden, containsExactlyInAnyOrder(...)
+	// afirma que aunque la lista debe contener todo lo que afirmamos, el orden no importa.
 	@Test
 	void shouldReturnAllCashCardsWhenListIsRequested() {
 		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards", String.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		DocumentContext documentContext = JsonPath.parse(response.getBody());
+		int cashCardCount = documentContext.read("$.length()");
+		assertThat(cashCardCount).isEqualTo(3);
+
+		JSONArray ids = documentContext.read("$..id");
+		assertThat(ids).containsExactlyInAnyOrder(99, 100, 101);
+
+		JSONArray amounts = documentContext.read("$..amount");
+		assertThat(amounts).containsExactlyInAnyOrder(123.45, 100.0, 150.00);
 	}
 }
