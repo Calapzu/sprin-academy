@@ -2,6 +2,7 @@ package com.example.cashcard;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,8 +36,16 @@ public class CashCardController {
     // serán gestionadas por este método.
 
     @GetMapping("/{requestedId}")
-    public ResponseEntity<CashCard> findById(){
-        CashCard cashCard = new CashCard(99L, 123.45);
-        return ResponseEntity.ok(cashCard);
+    //Para ello, en primer lugar hacer que el controlador consciente de la variable de ruta que estamos presentando
+    // mediante la adición de la anotación @PathVariable al argumento del método controlador.
+    //@PathVariable hace que Spring Web conozca el requestedId suministrado en la petición HTTP.
+    // Ahora está disponible para que lo utilicemos en nuestro método handler.
+    public ResponseEntity<CashCard> findById(@PathVariable Long requestedId){
+        if (requestedId.equals(99L)) {
+            CashCard cashCard = new CashCard(99L, 123.45);
+            return ResponseEntity.ok(cashCard);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
