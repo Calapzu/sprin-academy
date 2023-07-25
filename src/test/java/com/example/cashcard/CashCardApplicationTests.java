@@ -1,5 +1,7 @@
 package com.example.cashcard;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,6 +51,23 @@ class CashCardApplicationTests {
 		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/99", String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		//Comprender las adiciones.
+		//
+		// DocumentContext documentContext = JsonPath.parse(response.getBody());
+		//Esto convierte la cadena de respuesta en un objeto JSON con muchos métodos de ayuda.
+		//
+		// Número id = documentContext.read("$.id");
+		// assertThat(id).isNotNull();
+		//Esperamos que cuando solicitemos una tarjeta de débito con id 99 se devuelva un objeto JSON con algo en el campo id.
+		// Por ahora aseguremos que el id no es nulo.
+
+		DocumentContext documentContext = JsonPath.parse(response.getBody());
+		Number id = documentContext.read("$.id");
+		assertThat(id).isEqualTo(99);
+
+		Double amount = documentContext.read("$.amount");
+		assertThat(amount).isEqualTo(123.45);
 	}
 
 }

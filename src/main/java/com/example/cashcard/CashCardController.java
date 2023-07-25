@@ -35,7 +35,8 @@ public class CashCardController {
     // serán gestionadas por este método.
 
     @GetMapping("/{requestedId}")
-    public ResponseEntity<String> findById(){
-        return ResponseEntity.ok("{}");
+    public ResponseEntity<CashCard> findById(){
+        CashCard cashCard = new CashCard(99L, 123.45);
+        return ResponseEntity.ok(cashCard);
     }
 }
