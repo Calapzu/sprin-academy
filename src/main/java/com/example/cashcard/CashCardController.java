@@ -42,10 +42,12 @@ public class CashCardController {
     }
 
     @GetMapping("/{requestedId}")
+
     //Para ello, en primer lugar hacer que el controlador consciente de la variable de ruta que estamos presentando
     // mediante la adición de la anotación @PathVariable al argumento del método controlador.
     //@PathVariable hace que Spring Web conozca el requestedId suministrado en la petición HTTP.
     // Ahora está disponible para que lo utilicemos en nuestro método handler.
+
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId) {
         Optional<CashCard> cashCardOPtional = cashCardRepository.findById(requestedId);
         if (cashCardOPtional.isPresent()) {
@@ -55,6 +57,40 @@ public class CashCardController {
         }
     }
 
+    //Esta línea en CashCardController.createCashCard es engañosamente simple:
+    //
+    //CashCard savedCashCard = cashCardRepository.save(newCashCardRequest);
+    //Como hemos aprendido en lecciones y laboratorios anteriores,
+    // CrudRepository de Spring Data proporciona métodos que permiten crear, leer,
+    // actualizar y eliminar datos de un almacén de datos. cashCardRepository.save(newCashCardRequest)
+    // hace exactamente lo que dice: nos guarda una nueva CashCard, y devuelve el objeto guardado con un id único
+    // proporcionado por la base de datos. ¡Increíble!
+
+    //Entender los otros cambios a CashCardController
+    //Nuestro CashCardController ahora implementa la entrada y los resultados esperados de un HTTP POST.
+    //
+    //createCashCard(@RequestBody CashCard newCashCardRequest, ...)
+    //A diferencia del GET que añadimos antes, el POST espera un "cuerpo" de solicitud.
+    // Éste contiene los datos enviados a la API. Spring Web deserializará los datos en una CashCard para nosotros.
+    //
+    //URI locationOfNewCashCard = ucb
+    //   .path("cashcards/{id}")
+    //   .buildAndExpand(savedCashCard.id())
+    //   .toUri();
+    //Esto construye un URI para la CashCard recién creada. Este es el URI que el emisor de la llamada puede utilizar
+    // para OBTENER la CashCard recién creada.
+    //
+    //Tenga en cuenta que se utiliza savedCashCard.id como identificador, lo que coincide con la especificación del
+    // punto final GET de cashcards/<CashCard.id>.
+    //
+    //¿De dónde procede UriComponentsBuilder?
+    //
+    //Hemos podido añadir UriComponentsBuilder ucb como argumento de método a este método POST handler y se ha pasado
+    // automáticamente. ¿Cómo? Fue inyectado desde nuestro ya familiar amigo, el Contenedor IoC de Spring.
+    // ¡Gracias, Spring Web!
+    //
+    //return ResponseEntity.created(locationOfNewCashCard).build();
+    //Finalmente, devolvemos 201 CREATED con la cabecera Location correcta.
     @PostMapping
     private ResponseEntity<Void> createCashCard(@RequestBody CashCard newCashCardRequest,
                                                 UriComponentsBuilder ucb) {
@@ -63,7 +99,7 @@ public class CashCardController {
                 .path("cashcards/{id}")
                 .buildAndExpand(savedCashCard.id())
                 .toUri();
-        
+
         return ResponseEntity.created(locationOfNewCashCard).build();
     }
 }
