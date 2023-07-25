@@ -180,4 +180,30 @@ class CashCardApplicationTests {
 		JSONArray amounts = documentContext.read("$..amount");
 		assertThat(amounts).containsExactlyInAnyOrder(123.45, 100.0, 150.00);
 	}
+
+	//Comprenda la prueba.
+	//
+	//El URI que estamos solicitando contiene información tanto de paginación como de
+	// ordenación: /tarjetas?page=0&size=1&sort=cantidad,desc
+	//
+	//page=0: Obtiene la primera página. Los índices de página empiezan en 0.
+	//size=1: Cada página tiene tamaño 1.
+	//sort=importe,desc
+	//La extracción de datos (¡usando más JSONPath!) y las aserciones que la acompañan esperan que la
+	// tarjeta Cash Card devuelta sea la de 150,00 dólares.
+	//
+	//¿Crees que la prueba pasará? Antes de ejecutarla, intenta averiguar si pasará o no. Si crees que no pasará,
+	// ¿dónde crees que estará el fallo?
+	@Test
+	void shouldReturnASortedPageOfCashCards() {
+		ResponseEntity<String> response = restTemplate.getForEntity("/cashcards?page=0&size=1&sort=amount,desc", String.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		DocumentContext documentContext = JsonPath.parse(response.getBody());
+		JSONArray read = documentContext.read("$[*]");
+		assertThat(read.size()).isEqualTo(1);
+
+		double amount = documentContext.read("$[0].amount");
+		assertThat(amount).isEqualTo(150.00);
+	}
 }
