@@ -1,6 +1,9 @@
 package com.example.cashcard;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 //¿Qué esperamos que ocurra cuando volvamos a ejecutar las pruebas?
 //
@@ -12,9 +15,26 @@ import org.springframework.http.ResponseEntity;
 //
 //Traducción realizada con la versión gratuita del traductor www.DeepL.com/Translator
 
-
+@RestController
+@RequestMapping("/cashcards")
 public class CashCardController {
 
+    //Comprender las anotaciones de Spring Web.
+    //
+    //Revisemos nuestras anotaciones.
+    //
+    // @RestController
+    //Esto le dice a Spring que esta clase es un Componente de tipo RestController y capaz de manejar peticiones HTTP.
+    //
+    // @RequestMapping("/tarjetas")
+    //Es un complemento de @RestController que indica qué dirección deben tener las peticiones para acceder a este Controlador.
+    //
+    // @GetMapping("/{requestedId}")
+    // public ResponseEntity<String> findById() {...}
+    //@GetMapping marca un método como método manejador. Las peticiones GET que coincidan con cashcards/{requestedID}
+    // serán gestionadas por este método.
+
+    @GetMapping("/{requestedId}")
     public ResponseEntity<String> findById(){
         return ResponseEntity.ok("{}");
     }
