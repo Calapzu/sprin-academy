@@ -78,4 +78,23 @@ class CashCardApplicationTests {
 		assertThat(response.getBody()).isBlank();
 	}
 
+
+	//Entienda la prueba.
+	//
+	//CashCard newCashCard = new CashCard(null, 250.00);
+	//La base de datos creará y gestionará todos los valores únicos de CashCard.id por nosotros.
+	// No debemos proporcionar ninguno.
+	//
+	//restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
+	//Esto es muy similar a restTemplate.getForEntity, pero también debemos proporcionar los datos de newCashCard
+	// para la nueva CashCard.
+	//
+	//Además, y a diferencia de restTemplate.getForEntity, no esperamos que se nos devuelva una CashCard,
+	// por lo que esperamos un cuerpo de respuesta Void.
+	@Test
+	void shouldCreateANewCashCard() {
+		CashCard newCashCard = new CashCard(null, 250.00);
+		ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
 }

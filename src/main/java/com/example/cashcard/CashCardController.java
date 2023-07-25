@@ -38,7 +38,7 @@ public class CashCardController {
     // serán gestionadas por este método.
     private CashCardRepository cashCardRepository;
 
-    public CashCardController(CashCardRepository cardRepository){
+    public CashCardController(CashCardRepository cashCardRepository){
         this.cashCardRepository = cashCardRepository;
     }
 
