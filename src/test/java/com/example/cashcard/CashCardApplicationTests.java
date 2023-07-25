@@ -9,6 +9,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /*
@@ -91,10 +93,43 @@ class CashCardApplicationTests {
 	//
 	//Además, y a diferencia de restTemplate.getForEntity, no esperamos que se nos devuelva una CashCard,
 	// por lo que esperamos un cuerpo de respuesta Void.
+
+	//Comprenda las actualizaciones de las pruebas.
+	//
+	//Hemos realizado bastantes cambios. Repasémoslos.
+	//
+	//assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+	//Según la especificación oficial
+	//
+	//el servidor de origen DEBERÍA enviar una respuesta 201 (Creado) ...
+	//
+	//Ahora esperamos que el código de estado de respuesta HTTP sea 201 CREATED,
+	// que es semánticamente correcto si nuestra API crea una nueva CashCard a partir de nuestra solicitud.
+	//
+	//URI locationOfNewCashCard = createResponse.getHeaders().getLocation();
+	//La especificación oficial sigue indicando lo siguiente
+	//
+	//enviar una respuesta 201 (Created) que contenga un campo de cabecera Location que
+	// proporcione un identificador para el recurso primario creado ...
+	//
+	//En otras palabras, cuando una solicitud POST resulta en la creación exitosa de un recurso, como una nueva CashCard,
+	// la respuesta debe incluir información sobre cómo recuperar ese recurso.
+	// Lo haremos proporcionando un URI en una cabecera de respuesta llamada "Location".
+	//
+	//Tenga en cuenta que URI es la entidad correcta aquí y no una URL; una URL es un tipo de URI,
+	// mientras que una URI es más genérica.
+	//
+	//ResponseEntity<String> getResponse = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+	//assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+	//Por último, utilizaremos la información de la cabecera Location para obtener la tarjeta CashCard recién creada.
 	@Test
 	void shouldCreateANewCashCard() {
 		CashCard newCashCard = new CashCard(null, 250.00);
 		ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
-		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+		URI locationOfNewCashCard = createResponse.getHeaders().getLocation();
+		ResponseEntity<String> getResponse = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 }
