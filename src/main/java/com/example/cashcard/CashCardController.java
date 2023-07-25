@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 //¿Qué esperamos que ocurra cuando volvamos a ejecutar las pruebas?
 //
 //esperado: 200 OK
@@ -34,6 +36,11 @@ public class CashCardController {
     // public ResponseEntity<String> findById() {...}
     //@GetMapping marca un método como método manejador. Las peticiones GET que coincidan con cashcards/{requestedID}
     // serán gestionadas por este método.
+    private CashCardRepository cashCardRepository;
+
+    public CashCardController(CashCardRepository cardRepository){
+        this.cashCardRepository = cashCardRepository;
+    }
 
     @GetMapping("/{requestedId}")
     //Para ello, en primer lugar hacer que el controlador consciente de la variable de ruta que estamos presentando
@@ -41,9 +48,9 @@ public class CashCardController {
     //@PathVariable hace que Spring Web conozca el requestedId suministrado en la petición HTTP.
     // Ahora está disponible para que lo utilicemos en nuestro método handler.
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId){
-        if (requestedId.equals(99L)) {
-            CashCard cashCard = new CashCard(99L, 123.45);
-            return ResponseEntity.ok(cashCard);
+        Optional<CashCard> cashCardOPtional = cashCardRepository.findById(requestedId);
+        if (cashCardOPtional.isPresent()) {
+            return ResponseEntity.ok(cashCardOPtional.get());
         } else {
             return ResponseEntity.notFound().build();
         }
