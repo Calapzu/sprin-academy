@@ -1,10 +1,15 @@
 package com.example.cashcard;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 //¿Qué esperamos que ocurra cuando volvamos a ejecutar las pruebas?
@@ -101,5 +106,29 @@ public class CashCardController {
                 .toUri();
 
         return ResponseEntity.created(locationOfNewCashCard).build();
+    }
+
+    //Comprender el código de paginación.
+    //
+    //findAll(Pageable pageable)
+    //Pageable es otro objeto que Spring Web pone a nuestra disposición.
+    // Como hemos especificado los parámetros URI de page=0&size=1, pageable contendrá los valores que necesitamos.
+    //
+    //PageRequest.of(
+    //  pageable.getPageNumber(),
+    //  pageable.getPageSize()
+    //));
+    //PageRequest es una implementación Java Bean básica de Pageable. Las cosas que quieren una implementación
+    // de paginación y ordenación a menudo soportan esto, como algunos tipos de Repositorios de Datos de Spring.
+    //
+    //¿Soporta ya nuestro CashCardRepository paginación y ordenación? Averigüémoslo.
+
+    @GetMapping
+    public ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
+        Page<CashCard> page = cashCardRepository.findAll(
+                PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize()));
+        return ResponseEntity.ok(page.getContent());
     }
 }
