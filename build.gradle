@@ -18,6 +18,29 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//implementación 'org.springframework.data:spring-data-jdbc'
+	//Spring Data tiene muchas implementaciones para una variedad de tecnologías de bases de datos relacionales
+	// y no relacionales.
+	// Spring Data también tiene varias abstracciones sobre esas tecnologías.
+	// Estas abstracciones se conocen como ORM (Object-Relational Mapping framework).
+	//
+	//En este caso utilizaremos Spring Data JDBC. De la documentación de Spring Data JDBC:
+	//
+	//Spring Data JDBC tiene como objetivo ser conceptualmente fácil...
+	// Esto hace de Spring Data JDBC un ORM simple, limitado y opinable.
+	implementation 'org.springframework.data:spring-data-jdbc'
+
+	// testImplementation 'com.h2database:h2'
+	//Los marcos de gestión de bases de datos sólo funcionan si tienen una base de datos vinculada.
+	// H2 es una base de datos SQL "muy rápida, de código abierto y con API JDBC" implementada en Java.
+	// Funciona perfectamente con Spring Data JDBC.
+	//
+	//Nota testImplementation
+	//
+	//Esto le dice a Spring Boot que haga que la base de datos H2 esté disponible sólo cuando se ejecuten pruebas.
+	// Eventualmente necesitaremos una base de datos fuera de un contexto de pruebas, pero todavía no.
+	testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
