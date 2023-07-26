@@ -41,6 +41,9 @@ dependencies {
 	//Esto le dice a Spring Boot que haga que la base de datos H2 esté disponible sólo cuando se ejecuten pruebas.
 	// Eventualmente necesitaremos una base de datos fuera de un contexto de pruebas, pero todavía no.
 	testImplementation 'com.h2database:h2'
+
+	// Add the following dependency
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
