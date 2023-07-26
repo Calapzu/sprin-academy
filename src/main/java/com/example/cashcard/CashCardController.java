@@ -165,6 +165,39 @@ public class CashCardController {
         return ResponseEntity.notFound().build();
     }
 
+    //Comprender el código del Repositorio.
+    //
+    //Añadimos lógica al método del Controlador para comprobar si el ID de la tarjeta de crédito de la petición existe
+    // realmente en la base de datos. El método que utilizaremos es CashCardRepository.existsByIdAndOwner(id, username).
+    //
+    //Este es otro caso en el que Spring Data generará la implementación de este método siempre que lo añadamos al
+    // Repositorio.
+    //
+    //Entonces, ¿por qué no utilizar simplemente el método findByIdAndOwner() y comprobar si devuelve null?
+    // Podríamos hacerlo. Pero, tal llamada devolvería información extra
+    // (el contenido de la Tarjeta Monedero recuperada), así que nos gustaría evitarlo para no
+    // introducir complejidad extra.
+    //
+    //Si prefiere no utilizar el método existsByIdAndOwner(), ¡no hay problema! Puede utilizar findByIdAndOwner().
+    // El resultado de la prueba será el mismo.
+
+    @DeleteMapping("/{id}")
+    private ResponseEntity<Void> deleteCashCard(@PathVariable Long id, Principal principal) {
+        /*
+        if (!cashCardRepository.existsByIdAndOwner(id, principal.getName())) {
+
+            return ResponseEntity.notFound().build();
+        }
+        cashCardRepository.deleteById(id); // Add this line
+        return ResponseEntity.noContent().build();
+        */
+        if (cashCardRepository.existsByIdAndOwner(id, principal.getName())) {
+            cashCardRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     private CashCard findCashCard(Long requestedId, Principal principal) {
         return cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
     }
