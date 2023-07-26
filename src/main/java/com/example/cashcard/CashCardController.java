@@ -10,6 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,11 +54,10 @@ public class CashCardController {
     // mediante la adición de la anotación @PathVariable al argumento del método controlador.
     //@PathVariable hace que Spring Web conozca el requestedId suministrado en la petición HTTP.
     // Ahora está disponible para que lo utilicemos en nuestro método handler.
-
-    public ResponseEntity<CashCard> findById(@PathVariable Long requestedId) {
-        Optional<CashCard> cashCardOPtional = cashCardRepository.findById(requestedId);
-        if (cashCardOPtional.isPresent()) {
-            return ResponseEntity.ok(cashCardOPtional.get());
+    public ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
+        CashCard cashCard = findCashCard(requestedId, principal);
+        if (cashCard != null) {
+            return ResponseEntity.ok(cashCard);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -133,5 +133,39 @@ public class CashCardController {
                         pageable.getSortOr(Sort.by(Sort.Direction.ASC, "amount"))
                 ));
         return ResponseEntity.ok(page.getContent());
+    }
+
+    //Seguimos un patrón similar al del endpoint @PostMapping createCashCard().
+    //
+    //@PutMapping("/{requestedId}")
+    //private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate,
+    // Principal principal) {
+    //Hemos añadido el Principal como argumento del método, proporcionado automáticamente por Spring Security.
+    //
+    //¡Gracias de nuevo, Spring Security!
+    //
+    //cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+    //Aquí limitamos nuestra recuperación de la CashCard al RequestId y al Principal enviados
+    // (proporcionados por Spring Security) para garantizar que sólo el propietario autenticado y autorizado pueda
+    // actualizar esta CashCard.
+    //
+    //CashCard updatedCashCard = new CashCard(cashCard.id(), cashCardUpdate.amount(), principal.getName());
+    //cashCardRepository.save(tarjetaCashCardactualizada);
+    //Por último, crea una CashCard con los valores actualizados y guárdala.
+    //
+    //¡Eso ha sido mucho! Hagamos las pruebas y evaluemos en qué punto estamos.
+    @PutMapping("/{requestedId}")
+    private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
+        CashCard cashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        if (cashCard != null) {
+            CashCard updatedCashCard = new CashCard(cashCard.id(), cashCardUpdate.amount(), principal.getName());
+            cashCardRepository.save(updatedCashCard);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    private CashCard findCashCard(Long requestedId, Principal principal) {
+        return cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
     }
 }

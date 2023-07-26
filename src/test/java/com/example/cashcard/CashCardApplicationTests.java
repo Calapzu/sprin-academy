@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -260,6 +262,79 @@ class CashCardApplicationTests {
 		ResponseEntity<String> response = restTemplate
 				.withBasicAuth("sarah1", "abc123")
 				.getForEntity("/cashcards/102", String.class); // kumar2's data
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	//Momento de aprendizaje: ¿qué pasa con restTemplate.exchange()?
+	//¿Te has dado cuenta de que no estamos utilizando RestTemplate de la misma forma que en nuestras pruebas anteriores?
+	//
+	//Todas las demás pruebas utilizan métodos RestTemplate.xyzForEntity() como getForEntity() y postForEntity().
+	//
+	//Entonces, ¿por qué no seguimos el mismo patrón utilizando putForEntity()?
+	//
+	//Respuesta: putForEntity() no existe. Lee más al respecto aquí en el tema de GitHub sobre el tema.
+	//
+	//Afortunadamente RestTemplate soporta múltiples formas de interactuar con las APIs REST, como RestTemplate.exchange().
+	//
+	//Conozcamos ahora RestTemplate.exchange().
+	//
+	//Entender RestTemplate.exchange().
+	//
+	//Entendamos mejor lo que ocurre.
+	//
+	//El método exchange() es una versión más general de los métodos xyzForEntity() que hemos utilizado en otras pruebas:
+	// exchange() requiere que se suministren como parámetros el verbo y la entidad de la petición
+	// (el cuerpo de la petición).
+	//
+	//Utilizando getForEntity() como ejemplo, puede imaginarse que las dos líneas de código siguientes consiguen
+	// }el mismo objetivo:
+	//
+	//.exchange("/tarjetas/99", HttpMethod.GET, new HttpEntity(null), String.class);
+	//
+	//La línea anterior es funcionalmente equivalente a la siguiente
+	//
+	//.getForEntity("/tarjetas/99", String.class);
+	//
+	//Ahora vamos a explicar el código de prueba.
+	//
+	//Primero creamos la HttpEntity que necesita el método exchange():
+	//
+	//HttpEntity<CashCard> request = new HttpEntity<>(existingCashCard);
+	//A continuación, llamamos a exchange(), que envía una solicitud PUT para el ID de destino de 99 y los
+	// datos actualizados de Cash Card:
+	//.exchange("/tarjetas/99", HttpMethod.PUT, request, Void.class);
+
+
+	@Test
+	@DirtiesContext
+	void shouldUpdateAnExistingCashCard() {
+		CashCard cashCardUpdate = new CashCard(null, 19.99, null);
+		HttpEntity<CashCard> request = new HttpEntity<>(cashCardUpdate);
+		ResponseEntity<Void> response = restTemplate
+				.withBasicAuth("sarah1", "abc123")
+				.exchange("/cashcards/99", HttpMethod.PUT, request, Void.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+		ResponseEntity<String> getResponse = restTemplate
+				.withBasicAuth("sarah1", "abc123")
+				.getForEntity("/cashcards/99", String.class);
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		DocumentContext documentContext = JsonPath.parse(getResponse.getBody());
+		Number id = documentContext.read("$.id");
+		Double amount = documentContext.read("$.amount");
+		assertThat(id).isEqualTo(99);
+		assertThat(amount).isEqualTo(19.99);
+	}
+
+	@Test
+	void shouldNotUpdateACashCardThatDoesNotExist() {
+		CashCard unknownCard = new CashCard(null, 19.99, null);
+		HttpEntity<CashCard> request = new HttpEntity<>(unknownCard);
+		ResponseEntity<Void> response = restTemplate
+				.withBasicAuth("sarah1", "abc123")
+				.exchange("/cashcards/99999", HttpMethod.PUT, request, Void.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 }
